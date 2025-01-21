@@ -11,9 +11,9 @@ export default function Sidebar() {
                 <Link href="/manage/shops" className="p-4 hover:bg-gray-700">
                     Manage Shops
                 </Link>
-                <Link href="/manage/bowls" className="p-4 hover:bg-gray-700">
+                {/* <Link href="/manage/bowls" className="p-4 hover:bg-gray-700">
                     Manage Bowls
-                </Link>
+                </Link> */}
                 <Link href="/manage/allergens" className="p-4 hover:bg-gray-700">
                     Manage Allergens
                 </Link>

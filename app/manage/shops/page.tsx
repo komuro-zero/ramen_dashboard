@@ -6,6 +6,15 @@ interface Shop {
     id: number;
     name: string;
     address: string;
+    ramen: Ramen[];
+}
+
+interface Ramen {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    allergens: Allergen[];
 }
 
 interface Allergen {
@@ -18,8 +27,8 @@ export default function ManageShops() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editShop, setEditShop] = useState<Shop | null>(null);
     const [allergens, setAllergens] = useState<Allergen[]>([]);
+    const [editRamen, setEditRamen] = useState<Ramen[]>([]);
 
-    // Fetch shops and allergens from the database
     useEffect(() => {
         async function fetchData() {
             const shopRes = await fetch("/api/shops");
@@ -30,143 +39,282 @@ export default function ManageShops() {
         fetchData();
     }, []);
 
-    const handleSave = async (shop: Shop) => {
-        if (editShop) {
-            // Update shop
-            await fetch(`/api/shops/${editShop.id}`, {
-                method: "PUT",
+    const handleSave = async () => {
+        const payload = {
+            id: editShop?.id || null,
+            name: editShop?.name || "",
+            address: editShop?.address || "",
+            ramen: editRamen.map((r) => ({
+                ...r,
+                allergens: r.allergens.map((a) => ({ id: a.id })),
+            })),
+        };
+
+        const method = editShop && editShop.id ? "PUT" : "POST";
+        const url = editShop && editShop.id ? `/api/shops/${editShop.id}` : "/api/shops";
+
+        try {
+            const res = await fetch(url, {
+                method,
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(shop),
+                body: JSON.stringify(payload),
             });
-            setShops((prev) =>
-                prev.map((s) => (s.id === editShop.id ? { ...s, ...shop } : s))
-            );
-        } else {
-            // Add new shop
-            const res = await fetch("/api/shops", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(shop),
-            });
-            const newShop = await res.json();
-            setShops((prev) => [...prev, newShop]);
+
+            if (!res.ok) {
+                console.error(`Failed to save shop: ${res.status} ${res.statusText}`);
+                alert("Failed to save the shop. Please try again.");
+                return;
+            }
+
+            const updatedShop = await res.json();
+
+            if (editShop && editShop.id) {
+                setShops((prev) =>
+                    prev.map((s) => (s.id === updatedShop.id ? updatedShop : s))
+                );
+            } else {
+                setShops((prev) => [...prev, updatedShop]);
+            }
+
+            setIsModalOpen(false);
+            setEditShop(null);
+        } catch (error) {
+            console.error("Error saving shop:", error);
+            alert("An error occurred while saving the shop.");
         }
-        setIsModalOpen(false);
-        setEditShop(null);
     };
 
-    const handleDelete = async (id: number) => {
-        const confirm = window.confirm("Are you sure you want to delete this shop?");
-        if (confirm) {
-            await fetch(`/api/shops/${id}`, { method: "DELETE" });
-            setShops((prev) => prev.filter((shop) => shop.id !== id));
-        }
+    const handleAddShop = () => {
+        setEditShop({
+            id: 0,
+            name: "",
+            address: "",
+            ramen: [],
+        }); // Initialize a new shop object
+        setEditRamen([]);
+        setIsModalOpen(true);
+    };
+
+    const handleAddRamen = () => {
+        setEditRamen((prev) => [
+            ...prev,
+            { id: Date.now(), name: "", description: "", price: 0, allergens: [] },
+        ]);
+    };
+
+    const handleDeleteRamen = (id: number) => {
+        setEditRamen((prev) => prev.filter((r) => r.id !== id));
+    };
+
+    const toggleAllergen = (ramenId: number, allergenId: number) => {
+        setEditRamen((prev) =>
+            prev.map((ramen) =>
+                ramen.id === ramenId
+                    ? {
+                        ...ramen,
+                        allergens: ramen.allergens.some((a) => a.id === allergenId)
+                            ? ramen.allergens.filter((a) => a.id !== allergenId)
+                            : [...ramen.allergens, allergens.find((a) => a.id === allergenId)!],
+                    }
+                    : ramen
+            )
+        );
     };
 
     return (
-        <div>
-            <h1 className="text-2xl font-bold mb-6">Manage Shops</h1>
+        <div className="bg-gray-100 min-h-screen p-6">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">Manage Shops</h1>
             <button
-                onClick={() => {
-                    setEditShop(null);
-                    setIsModalOpen(true);
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded mb-4"
+                onClick={handleAddShop}
+                className="px-4 py-2 bg-blue-600 text-white rounded mb-6 shadow-md hover:bg-blue-700 transition duration-300"
             >
                 Add Shop
             </button>
-            <ul>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {shops.map((shop) => (
                     <li
                         key={shop.id}
-                        className="flex justify-between items-center p-4 mb-2 bg-white rounded shadow"
+                        className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition duration-300"
                     >
-                        <div>
-                            <h2 className="font-semibold">{shop.name}</h2>
-                            <p>{shop.address}</p>
-                        </div>
-                        <div>
+                        <h2 className="text-xl font-semibold text-gray-800 mb-2">{shop.name}</h2>
+                        <p className="text-gray-600 mb-4">{shop.address}</p>
+                        <ul className="space-y-2">
+                            {shop.ramen.map((ramen) => (
+                                <li
+                                    key={ramen.id}
+                                    className="bg-gray-50 rounded-md p-3 shadow-sm border border-gray-200"
+                                >
+                                    <h3 className="text-md font-medium text-gray-700">{ramen.name}</h3>
+                                    <p className="text-sm text-gray-500">
+                                        ¥{ramen.price.toLocaleString("ja-JP")}
+                                    </p>
+                                    <ul className="mt-1 flex flex-wrap gap-1">
+                                        {ramen.allergens.map((allergen) => (
+                                            <li
+                                                key={allergen.id}
+                                                className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded"
+                                            >
+                                                {allergen.name}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="mt-4 flex justify-between">
                             <button
                                 onClick={() => {
-                                    setEditShop(shop);
+                                    setEditShop(shop); // Set the shop to edit
+                                    setEditRamen(shop.ramen);
                                     setIsModalOpen(true);
                                 }}
-                                className="px-3 py-1 bg-yellow-500 text-white rounded mr-2"
+                                className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition duration-300"
                             >
                                 Edit
-                            </button>
-                            <button
-                                onClick={() => handleDelete(shop.id)}
-                                className="px-3 py-1 bg-red-600 text-white rounded"
-                            >
-                                Delete
                             </button>
                         </div>
                     </li>
                 ))}
             </ul>
 
-            {/* Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-                    <div className="bg-white p-6 rounded shadow-lg w-96">
-                        <h2 className="text-lg font-bold mb-4">
-                            {editShop ? "Edit Shop" : "Add Shop"}
-                        </h2>
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-lg max-h-screen overflow-y-auto p-6">
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();
-                                const form = e.target as HTMLFormElement;
-                                const name = (form.elements.namedItem("name") as HTMLInputElement).value;
-                                const address = (form.elements.namedItem("address") as HTMLInputElement).value;
-                                handleSave({ id: editShop?.id || 0, name, address });
+                                handleSave();
                             }}
                         >
-                            <div className="mb-4">
-                                <label className="block font-semibold mb-2">Shop Name</label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    defaultValue={editShop?.name || ""}
-                                    className="w-full p-2 border rounded"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block font-semibold mb-2">Address</label>
-                                <input
-                                    type="text"
-                                    name="address"
-                                    defaultValue={editShop?.address || ""}
-                                    className="w-full p-2 border rounded"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-4">
-                                <label className="block font-semibold mb-2">Allergens</label>
-                                <ul>
-                                    {allergens.map((allergen) => (
-                                        <li key={allergen.id} className="flex items-center gap-2">
-                                            <input type="checkbox" name="allergens" value={allergen.id} />
-                                            <span>{allergen.name}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                            <h2 className="text-xl font-bold mb-4">
+                                {editShop && editShop.id ? "Edit Shop" : "Add Shop"}
+                            </h2>
+                            {/* Shop Name */}
+                            <label className="block font-semibold text-gray-800 mb-2">Shop Name</label>
+                            <input
+                                type="text"
+                                value={editShop?.name || ""}
+                                onChange={(e) =>
+                                    setEditShop((prev) => ({ ...prev!, name: e.target.value }))
+                                }
+                                className="w-full p-2 border rounded mb-4"
+                                required
+                            />
+
+                            {/* Shop Address */}
+                            <label className="block font-semibold text-gray-800 mb-2">
+                                Shop Address
+                            </label>
+                            <input
+                                type="text"
+                                value={editShop?.address || ""}
+                                onChange={(e) =>
+                                    setEditShop((prev) => ({ ...prev!, address: e.target.value }))
+                                }
+                                className="w-full p-2 border rounded mb-4"
+                                required
+                            />
+
+                            {/* Ramen Section */}
+                            <h3 className="text-lg font-semibold text-gray-800 mb-2">Ramen</h3>
+                            <button
+                                onClick={handleAddRamen}
+                                type="button"
+                                className="mb-4 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300"
+                            >
+                                Add Ramen
+                            </button>
+                            {editRamen.map((ramen) => (
+                                <div key={ramen.id} className="mb-4 border rounded p-4 bg-gray-50">
+                                    <input
+                                        type="text"
+                                        value={ramen.name || ""}
+                                        placeholder="Ramen Name"
+                                        onChange={(e) =>
+                                            setEditRamen((prev) =>
+                                                prev.map((r) =>
+                                                    r.id === ramen.id
+                                                        ? { ...r, name: e.target.value }
+                                                        : r
+                                                )
+                                            )
+                                        }
+                                        className="w-full p-2 border rounded mb-2"
+                                        required
+                                    />
+                                    <textarea
+                                        value={ramen.description || ""}
+                                        placeholder="Ramen Description"
+                                        onChange={(e) =>
+                                            setEditRamen((prev) =>
+                                                prev.map((r) =>
+                                                    r.id === ramen.id
+                                                        ? { ...r, description: e.target.value }
+                                                        : r
+                                                )
+                                            )
+                                        }
+                                        className="w-full p-2 border rounded mb-2"
+                                    />
+                                    <input
+                                        type="number"
+                                        value={ramen.price || 0}
+                                        placeholder="Price (in JPY)"
+                                        onChange={(e) =>
+                                            setEditRamen((prev) =>
+                                                prev.map((r) =>
+                                                    r.id === ramen.id
+                                                        ? { ...r, price: parseInt(e.target.value) }
+                                                        : r
+                                                )
+                                            )
+                                        }
+                                        className="w-full p-2 border rounded mb-2"
+                                        required
+                                    />
+                                    <div className="mb-4">
+                                        <h4 className="font-medium text-gray-800 mb-2">Allergens</h4>
+                                        <ul className="flex flex-wrap gap-2">
+                                            {allergens.map((allergen) => (
+                                                <li key={allergen.id}>
+                                                    <label className="flex items-center space-x-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={ramen.allergens.some(
+                                                                (a) => a.id === allergen.id
+                                                            )}
+                                                            onChange={() =>
+                                                                toggleAllergen(ramen.id, allergen.id)
+                                                            }
+                                                        />
+                                                        <span>{allergen.name}</span>
+                                                    </label>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                    <button
+                                        onClick={() => handleDeleteRamen(ramen.id)}
+                                        type="button"
+                                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
+                                    >
+                                        Remove Ramen
+                                    </button>
+                                </div>
+                            ))}
+
+                            {/* Save Button */}
                             <div className="flex justify-end">
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        setIsModalOpen(false);
-                                        setEditShop(null);
-                                    }}
+                                    onClick={() => setIsModalOpen(false)}
                                     className="px-4 py-2 bg-gray-500 text-white rounded mr-2"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-blue-600 text-white rounded"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-300"
                                 >
                                     Save
                                 </button>

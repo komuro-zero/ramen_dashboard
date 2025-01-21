@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// GET: Fetch all shops
+// GET: Fetch all shops along with ramen and allergens
 export async function GET() {
     try {
         const shops = await prisma.shop.findMany({
@@ -29,12 +29,29 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, address } = body;
+        const { name, address, ramen } = body;
 
         const newShop = await prisma.shop.create({
             data: {
                 name,
                 address,
+                ramen: {
+                    create: ramen.map((r: any) => ({
+                        name: r.name,
+                        description: r.description,
+                        price: r.price,
+                        allergens: {
+                            connect: r.allergens.map((a: any) => ({ id: a.id })),
+                        },
+                    })),
+                },
+            },
+            include: {
+                ramen: {
+                    include: {
+                        allergens: true,
+                    },
+                },
             },
         });
 
@@ -43,6 +60,65 @@ export async function POST(request: Request) {
         console.error("Error creating shop:", error);
         return NextResponse.json(
             { error: "Failed to create shop" },
+            { status: 500 }
+        );
+    }
+}
+
+// PUT: Update a shop and its ramen
+export async function PUT(request: Request) {
+    try {
+        const body = await request.json();
+        const { id, name, address, ramen } = body;
+
+        const updatedShop = await prisma.shop.update({
+            where: { id },
+            data: {
+                name,
+                address,
+                ramen: {
+                    deleteMany: {}, // Remove all ramen to re-add updated ones
+                    create: ramen.map((r: any) => ({
+                        name: r.name,
+                        description: r.description,
+                        price: r.price,
+                        allergens: {
+                            connect: r.allergens.map((a: any) => ({ id: a.id })),
+                        },
+                    })),
+                },
+            },
+            include: {
+                ramen: {
+                    include: {
+                        allergens: true,
+                    },
+                },
+            },
+        });
+
+        return NextResponse.json(updatedShop);
+    } catch (error) {
+        console.error("Error updating shop:", error);
+        return NextResponse.json(
+            { error: "Failed to update shop" },
+            { status: 500 }
+        );
+    }
+}
+
+// DELETE: Delete a shop
+export async function DELETE(request: Request) {
+    try {
+        const { id } = await request.json();
+        await prisma.shop.delete({
+            where: { id },
+        });
+        return NextResponse.json({ message: "Shop deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting shop:", error);
+        return NextResponse.json(
+            { error: "Failed to delete shop" },
             { status: 500 }
         );
     }
