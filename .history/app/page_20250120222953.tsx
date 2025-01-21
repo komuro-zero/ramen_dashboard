@@ -1,24 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function SearchPage() {
   const [allergies, setAllergies] = useState<string[]>([]);
   const [results, setResults] = useState<any[]>([]);
-  const [allergyOptions, setAllergyOptions] = useState<any[]>([]); // Use any[] for now
 
-  useEffect(() => {
-    async function fetchAllergens() {
-      try {
-        const response = await fetch(`/api/allergens`);
-        const data = await response.json();
-        setAllergyOptions(data);
-      } catch (error) {
-        console.error("Error fetching allergens:", error);
-      }
-    }
-    fetchAllergens();
-  }, []);
+  const allergyOptions = ["Fish", "Milk", "Shellfish", "Egg", "Almonds and Nuts"];
 
   const toggleAllergy = (allergy: string) => {
     setAllergies((prev) =>
@@ -49,18 +37,18 @@ export default function SearchPage() {
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Select Allergies:</h2>
         <div className="flex flex-wrap gap-4">
-          {allergyOptions.map((allergen) => (
+          {allergyOptions.map((allergy) => (
             <button
-              key={allergen.id} // Use allergen.id as key
-              onClick={() => toggleAllergy(allergen.name)} // Toggle by name
+              key={allergy}
+              onClick={() => toggleAllergy(allergy)}
               className={`px-3 py-1 rounded-lg cursor-pointer 
-                ${allergies.includes(allergen.name) // Check inclusion by name
+                ${allergies.includes(allergy)
                   ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700"
                 }
                 hover:bg-blue-500 hover:text-white`}
             >
-              {allergen.name}
+              {allergy}
             </button>
           ))}
         </div>

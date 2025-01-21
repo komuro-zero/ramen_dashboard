@@ -30,13 +30,14 @@ body {
   top: 0;
 }
 
+/* Lighter sidebar options */
 .sidebar-option {
-  /* Or #sidebar-option if it's an ID */
   background-color: rgba(255, 255, 255, 0.1);
+  /* Light overlay for dark mode */
   transition: background-color 0.2s ease;
 }
 
 .sidebar-option:hover {
-  /* Or #sidebar-option:hover */
   background-color: rgba(255, 255, 255, 0.2);
+  /* Slightly lighter on hover */
 }

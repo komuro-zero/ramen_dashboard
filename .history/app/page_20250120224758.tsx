@@ -1,11 +1,13 @@
 "use client";
 
+
 import { useState, useEffect } from "react";
 
 export default function SearchPage() {
   const [allergies, setAllergies] = useState<string[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const [allergyOptions, setAllergyOptions] = useState<any[]>([]); // Use any[] for now
+
 
   useEffect(() => {
     async function fetchAllergens() {
@@ -49,17 +51,22 @@ export default function SearchPage() {
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Select Allergies:</h2>
         <div className="flex flex-wrap gap-4">
+
           {allergyOptions.map((allergen) => (
             <button
+
+
               key={allergen.id} // Use allergen.id as key
               onClick={() => toggleAllergy(allergen.name)} // Toggle by name
               className={`px-3 py-1 rounded-lg cursor-pointer 
+
                 ${allergies.includes(allergen.name) // Check inclusion by name
                   ? "bg-blue-600 text-white"
                   : "bg-gray-100 text-gray-700"
                 }
                 hover:bg-blue-500 hover:text-white`}
             >
+
               {allergen.name}
             </button>
           ))}

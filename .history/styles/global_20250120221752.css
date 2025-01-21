@@ -1,0 +1,12 @@
+/* styles/global.css */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: white;
+    /* Set default background color */
+    color: black;
+    /* Set default text color */
+    font-family: Arial, sans-serif;
+    /* Optional: Define a font */
+}
