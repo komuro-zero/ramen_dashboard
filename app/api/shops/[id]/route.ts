@@ -3,64 +3,60 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// PUT: Update a shop by ID
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+// PUT: Update a shop and its ramen
+export async function PUT(request: Request) {
     try {
-        const { id } = await params;
         const body = await request.json();
-        const { name, address, ramen } = body;
+        const { id, name, address, ramen } = body;
 
-        console.log("Received PUT request for shop ID:", id);
-        console.log("Received data:", body);
-
-        // Update shop information
         const updatedShop = await prisma.shop.update({
-            where: { id: Number(id) },
+            where: { id },
             data: {
                 name,
                 address,
+                ramen: {
+                    deleteMany: {}, // Remove all existing ramen to re-add updated ones
+                    create: ramen.map((r: any) => ({
+                        name: r.name,
+                        description: r.description,
+                        price: r.price,
+                        allergens: {
+                            connect: r.allergens.map((a: any) => ({ id: a.id })), // Connect allergens by ID
+                        },
+                    })),
+                },
+            },
+            include: {
+                ramen: {
+                    include: {
+                        allergens: true, // Include allergens to get their full details
+                    },
+                },
             },
         });
-        console.log("Updated shop:", updatedShop);
 
-        // Update ramen bowls
-        if (Array.isArray(ramen)) {
-            for (const ramenItem of ramen) {
-                if (ramenItem.id) {
-                    // Update existing ramen bowl
-                    await prisma.ramen.update({
-                        where: { id: ramenItem.id },
-                        data: {
-                            name: ramenItem.name,
-                            description: ramenItem.description || null,
-                            price: ramenItem.price,
-                        },
-                    });
-                    console.log("Updated ramen:", ramenItem);
-                } else {
-                    // Create new ramen bowl
-                    await prisma.ramen.create({
-                        data: {
-                            name: ramenItem.name,
-                            description: ramenItem.description || null,
-                            price: ramenItem.price,
-                            shopId: Number(id),
-                        },
-                    });
-                    console.log("Created new ramen:", ramenItem);
-                }
-            }
-        }
+        // Map ramen to include allergen details
+        const resultWithAllergenNames = {
+            ...updatedShop,
+            ramen: updatedShop.ramen.map((r) => ({
+                ...r,
+                allergens: r.allergens.map((a) => ({
+                    id: a.id,
+                    name: a.name, // Ensure the name is included
+                })),
+            })),
+        };
 
-        return NextResponse.json(body);
+        return NextResponse.json(resultWithAllergenNames);
     } catch (error) {
-        console.error("Error updating shop and ramen:", error);
+        console.error("Error updating shop:", error);
         return NextResponse.json(
-            { error: "Failed to update shop and ramen" },
+            { error: "Failed to update shop" },
             { status: 500 }
         );
     }
 }
+
 
 // DELETE: Delete a shop by ID
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {

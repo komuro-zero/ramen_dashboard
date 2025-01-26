@@ -134,9 +134,21 @@ export default function ManageShops() {
                 {shops.map((shop) => (
                     <li
                         key={shop.id}
-                        className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition duration-300"
+                        className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition duration-300 relative"
                     >
-                        <h2 className="text-xl font-semibold text-gray-800 mb-2">{shop.name}</h2>
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-semibold text-gray-800">{shop.name}</h2>
+                            <button
+                                onClick={() => {
+                                    setEditShop(shop);
+                                    setEditRamen(shop.ramen);
+                                    setIsModalOpen(true);
+                                }}
+                                className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition duration-300"
+                            >
+                                Edit
+                            </button>
+                        </div>
                         <p className="text-gray-600 mb-4">{shop.address}</p>
                         <ul className="space-y-2">
                             {shop.ramen.map((ramen) => (
@@ -161,25 +173,24 @@ export default function ManageShops() {
                                 </li>
                             ))}
                         </ul>
-                        <div className="mt-4 flex justify-between">
-                            <button
-                                onClick={() => {
-                                    setEditShop(shop); // Set the shop to edit
-                                    setEditRamen(shop.ramen);
-                                    setIsModalOpen(true);
-                                }}
-                                className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition duration-300"
-                            >
-                                Edit
-                            </button>
-                        </div>
                     </li>
                 ))}
             </ul>
 
             {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-                    <div className="bg-white rounded-lg shadow-lg w-full max-w-lg max-h-screen overflow-y-auto p-6">
+                <div
+                    className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50"
+                    onClick={(e) => {
+                        // Close the modal only if clicking outside the modal content
+                        if ((e.target as HTMLElement).classList.contains("bg-gray-800")) {
+                            setIsModalOpen(false);
+                        }
+                    }}
+                >
+                    <div
+                        className="bg-white rounded-lg shadow-lg w-full max-w-lg max-h-[90vh] overflow-y-auto p-4"
+                        onClick={(e) => e.stopPropagation()} // Prevent modal click from closing it
+                    >
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();
@@ -189,6 +200,7 @@ export default function ManageShops() {
                             <h2 className="text-xl font-bold mb-4">
                                 {editShop && editShop.id ? "Edit Shop" : "Add Shop"}
                             </h2>
+
                             {/* Shop Name */}
                             <label className="block font-semibold text-gray-800 mb-2">Shop Name</label>
                             <input
@@ -217,13 +229,6 @@ export default function ManageShops() {
 
                             {/* Ramen Section */}
                             <h3 className="text-lg font-semibold text-gray-800 mb-2">Ramen</h3>
-                            <button
-                                onClick={handleAddRamen}
-                                type="button"
-                                className="mb-4 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300"
-                            >
-                                Add Ramen
-                            </button>
                             {editRamen.map((ramen) => (
                                 <div key={ramen.id} className="mb-4 border rounded p-4 bg-gray-50">
                                     <input
@@ -257,58 +262,47 @@ export default function ManageShops() {
                                         className="w-full p-2 border rounded mb-2"
                                     />
                                     <input
-                                        type="number"
+                                        type="text"
                                         value={ramen.price || 0}
                                         placeholder="Price (in JPY)"
-                                        onChange={(e) =>
+                                        inputMode="numeric" // Ensures only numeric input is possible
+                                        pattern="\d*" // Ensures only digits are accepted
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
                                             setEditRamen((prev) =>
                                                 prev.map((r) =>
-                                                    r.id === ramen.id
-                                                        ? { ...r, price: parseInt(e.target.value) }
-                                                        : r
+                                                    r.id === ramen.id ? { ...r, price: parseInt(value || "0") } : r
                                                 )
-                                            )
-                                        }
+                                            );
+                                        }}
                                         className="w-full p-2 border rounded mb-2"
                                         required
                                     />
-                                    <div className="mb-4">
-                                        <h4 className="font-medium text-gray-800 mb-2">Allergens</h4>
-                                        <ul className="flex flex-wrap gap-2">
-                                            {allergens.map((allergen) => (
-                                                <li key={allergen.id}>
-                                                    <label className="flex items-center space-x-2">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={ramen.allergens.some(
-                                                                (a) => a.id === allergen.id
-                                                            )}
-                                                            onChange={() =>
-                                                                toggleAllergen(ramen.id, allergen.id)
-                                                            }
-                                                        />
-                                                        <span>{allergen.name}</span>
-                                                    </label>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
                                     <button
                                         onClick={() => handleDeleteRamen(ramen.id)}
                                         type="button"
-                                        className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
+                                        className="mt-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
                                     >
                                         Remove Ramen
                                     </button>
                                 </div>
                             ))}
 
-                            {/* Save Button */}
-                            <div className="flex justify-end">
+                            {/* Add Ramen Button (Top of Modal) */}
+                            <button
+                                onClick={handleAddRamen}
+                                type="button"
+                                className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition duration-300 w-full"
+                            >
+                                Add Ramen
+                            </button>
+
+                            {/* Buttons */}
+                            <div className="flex justify-end space-x-2">
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 bg-gray-500 text-white rounded mr-2"
+                                    className="px-4 py-2 bg-gray-500 text-white rounded"
                                 >
                                     Cancel
                                 </button>
@@ -324,5 +318,6 @@ export default function ManageShops() {
                 </div>
             )}
         </div>
+
     );
 }
