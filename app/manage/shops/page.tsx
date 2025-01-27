@@ -46,7 +46,7 @@ export default function ManageShops() {
             address: editShop?.address || "",
             ramen: editRamen.map((r) => ({
                 ...r,
-                allergens: r.allergens.map((a) => ({ id: a.id })),
+                allergens: r.allergens.map((a) => ({ id: a.id })), // Send allergen IDs
             })),
         };
 
@@ -265,10 +265,10 @@ export default function ManageShops() {
                                         type="text"
                                         value={ramen.price || 0}
                                         placeholder="Price (in JPY)"
-                                        inputMode="numeric" // Ensures only numeric input is possible
-                                        pattern="\d*" // Ensures only digits are accepted
+                                        inputMode="numeric"
+                                        pattern="\d*"
                                         onChange={(e) => {
-                                            const value = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                                            const value = e.target.value.replace(/\D/g, "");
                                             setEditRamen((prev) =>
                                                 prev.map((r) =>
                                                     r.id === ramen.id ? { ...r, price: parseInt(value || "0") } : r
@@ -278,6 +278,31 @@ export default function ManageShops() {
                                         className="w-full p-2 border rounded mb-2"
                                         required
                                     />
+
+                                    {/* Allergen Section */}
+                                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Allergens</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {allergens.map((allergen) => (
+                                            <label
+                                                key={allergen.id}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={ramen.allergens.some(
+                                                        (a) => a.id === allergen.id
+                                                    )}
+                                                    onChange={() =>
+                                                        toggleAllergen(ramen.id, allergen.id)
+                                                    }
+                                                />
+                                                <span className="text-gray-700 text-sm">
+                                                    {allergen.name}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+
                                     <button
                                         onClick={() => handleDeleteRamen(ramen.id)}
                                         type="button"
@@ -288,7 +313,7 @@ export default function ManageShops() {
                                 </div>
                             ))}
 
-                            {/* Add Ramen Button (Top of Modal) */}
+                            {/* Add Ramen Button */}
                             <button
                                 onClick={handleAddRamen}
                                 type="button"
@@ -318,6 +343,5 @@ export default function ManageShops() {
                 </div>
             )}
         </div>
-
     );
 }

@@ -14,6 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="flex">
+        {/* Sidebar stays outside the main content */}
         <Sidebar />
         <main className="flex-1 p-6 bg-gray-100">{children}</main>
       </body>
