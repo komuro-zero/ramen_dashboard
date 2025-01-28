@@ -2,10 +2,34 @@
 
 import { useState, useEffect } from "react";
 
+type Allergen = {
+  id: string;
+  name: string;
+};
+
+type Ramen = {
+  id: string;
+  name: string;
+  allergens: Allergen[]; // Array of allergens
+};
+
+type Shop = {
+  id: string;
+  name: string;
+  address: string;
+  ramen: Ramen[];
+};
+
+type AllergyOption = {
+  id: string;
+  name: string;
+};
+
+
 export default function SearchPage() {
   const [allergies, setAllergies] = useState<string[]>([]);
-  const [results, setResults] = useState<any[]>([]);
-  const [allergyOptions, setAllergyOptions] = useState<any[]>([]); // Use any[] for now
+  const [results, setResults] = useState<Shop[]>([]);
+  const [allergyOptions, setAllergyOptions] = useState<AllergyOption[]>([]); // Use any[] for now
 
   useEffect(() => {
     async function fetchAllergens() {

@@ -15,13 +15,15 @@ export async function PUT(request: Request) {
                 name,
                 address,
                 ramen: {
-                    deleteMany: {}, // Remove all existing ramen to re-add updated ones
+                    deleteMany: {}, // Remove all existing ramen
                     create: ramen.map((r: any) => ({
                         name: r.name,
                         description: r.description,
                         price: r.price,
                         allergens: {
-                            connect: r.allergens.map((a: any) => ({ id: a.id })), // Connect allergens by ID
+                            connect: r.allergens
+                                ?.filter((a: any) => a.id) // Filter allergens with valid IDs
+                                .map((a: any) => ({ id: a.id })),
                         },
                     })),
                 },
@@ -29,20 +31,19 @@ export async function PUT(request: Request) {
             include: {
                 ramen: {
                     include: {
-                        allergens: true, // Include allergens to get their full details
+                        allergens: true,
                     },
                 },
             },
         });
 
-        // Map ramen to include allergen details
         const resultWithAllergenNames = {
             ...updatedShop,
             ramen: updatedShop.ramen.map((r) => ({
                 ...r,
                 allergens: r.allergens.map((a) => ({
                     id: a.id,
-                    name: a.name, // Ensure the name is included
+                    name: a.name,
                 })),
             })),
         };
@@ -59,12 +60,19 @@ export async function PUT(request: Request) {
 
 
 // DELETE: Delete a shop by ID
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+    request: Request,
+    context: { params: Promise<{ id: string }> } // Ensure `context.params` is correctly typed
+): Promise<Response> {
     try {
-        const { id } = params;
+        const { id } = await context.params;
+
+        if (!id) {
+            return NextResponse.json({ error: "ID is required" }, { status: 400 });
+        }
 
         await prisma.shop.delete({
-            where: { id: Number(id) },
+            where: { id: Number(id) }, // Convert `id` to a number if necessary
         });
 
         return NextResponse.json({ message: "Shop deleted successfully" });
