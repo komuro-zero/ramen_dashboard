@@ -1,9 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function Sidebar() {
-    const router = useRouter();
 
     const handleLogout = async () => {
         document.cookie = "authToken=; Max-Age=0; path=/;";

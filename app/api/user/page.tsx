@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma"; // Adjust the import path based on your setup
+import { prisma } from "@/lib/prisma"; // Adjust the import path based on your setup
 
 // GET: Fetch all users
 export async function GET() {
