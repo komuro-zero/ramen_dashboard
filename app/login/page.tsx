@@ -20,7 +20,7 @@ export default function Login() {
         });
 
         if (res.ok) {
-            router.push("/dash"); // Redirect to the homepage or another protected page
+            router.push("/dashboard/main"); // Redirect to the homepage or another protected page
         } else {
             const data = await res.json();
             setError(data.message || "Invalid credentials.");

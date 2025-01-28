@@ -6,13 +6,17 @@ export default function Sidebar() {
     const router = useRouter();
 
     const handleLogout = async () => {
-
-        // Clear the auth token (e.g., by removing cookies)
         document.cookie = "authToken=; Max-Age=0; path=/;";
+        localStorage.removeItem("authToken");
+        sessionStorage.removeItem("authToken");
 
-        // Redirect to the login page
-        const response = await fetch(`/api/logout`);
-        router.push("/login");
+        const response = await fetch(`/api/logout`, { method: "POST" });
+        if (response.ok) {
+            // Wait for cookie deletion to propagate before redirecting
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 500);
+        }
     };
 
     return (
@@ -22,19 +26,19 @@ export default function Sidebar() {
             </h2>
             <nav className="flex flex-col flex-grow">
                 <Link
-                    href="/dashboard"
+                    href="/dashboard/main"
                     className="p-4 hover:bg-gray-700 hover:text-teal-400 transition duration-200"
                 >
                     Search Allergies
                 </Link>
                 <Link
-                    href="/manage/shops"
+                    href="/dashboard/shops"
                     className="p-4 hover:bg-gray-700 hover:text-teal-400 transition duration-200"
                 >
                     Manage Shops
                 </Link>
                 <Link
-                    href="/manage/allergens"
+                    href="/dashboard/allergens"
                     className="p-4 hover:bg-gray-700 hover:text-teal-400 transition duration-200"
                 >
                     Manage Allergens

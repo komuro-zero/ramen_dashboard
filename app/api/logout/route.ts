@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
+        console.log("Logout endpoint hit");
         const response = NextResponse.json({ message: "Logout successful" });
 
         // Clear the authToken cookie
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
 
         // Perform additional cleanup if necessary (optional)
         // Example: Log logout activity, invalidate tokens, etc.
-
+        console.log("Logout successful");
         return response;
     } catch (error) {
         console.error("Logout error:", error);

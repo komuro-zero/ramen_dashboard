@@ -16,7 +16,7 @@ async function verifyToken(token: string) {
 
 export async function middleware(request: NextRequest) {
     const token = request.cookies.get("authToken")?.value;
-
+    console.log("Token:", token);
     if (!token) {
         // Redirect unauthenticated users trying to access protected pages
         if (!["/login", "/signup"].includes(request.nextUrl.pathname)) {

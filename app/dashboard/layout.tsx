@@ -1,4 +1,5 @@
 import "@/app/globals.css";
+import Sidebar from "@/components/Sidebar";
 
 export const metadata = {
   title: "Ramen Dashboard",
@@ -12,9 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen bg-gray-100">
-        {/* Main content area */}
-        <main className="flex-1 p-6">{children}</main>
+      <body className="flex min-h-screen w-full bg-gray-100">
+        <Sidebar />
+        <main className="flex-grow w-full p-6">{children}</main>
       </body>
     </html>
   );
