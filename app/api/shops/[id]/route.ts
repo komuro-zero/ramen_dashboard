@@ -3,14 +3,35 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+type Allergen = {
+    id: string;
+    name: string;
+};
+
+type Ramen = {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    allergens: Allergen[];
+};
+
+type Shop = {
+    id: string;
+    name: string;
+    address: string;
+    ramen: Ramen[];
+};
+
+
 // PUT: Update a shop and its ramen
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { id, name, address, ramen } = body;
+        const { id, name, address, ramen }: { id: string; name: string; address: string; ramen: Ramen[] } = body;
 
         const updatedShop = await prisma.shop.update({
-            where: { id },
+            where: { id: Number(id) },
             data: {
                 name,
                 address,
