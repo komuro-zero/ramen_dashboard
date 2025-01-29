@@ -31,20 +31,18 @@ export async function PUT(request: Request) {
         const { id, name, address, ramen }: { id: string; name: string; address: string; ramen: Ramen[] } = body;
 
         const updatedShop = await prisma.shop.update({
-            where: { id: Number(id) },
+            where: { id: Number(id) }, // Remove Number(id) if Prisma uses string IDs
             data: {
                 name,
                 address,
                 ramen: {
                     deleteMany: {}, // Remove all existing ramen
-                    create: ramen.map((r: any) => ({
+                    create: ramen.map((r: Ramen) => ({
                         name: r.name,
                         description: r.description,
                         price: r.price,
                         allergens: {
-                            connect: r.allergens
-                                ?.filter((a: any) => a.id) // Filter allergens with valid IDs
-                                .map((a: any) => ({ id: a.id })),
+                            connect: r.allergens.length > 0 ? r.allergens.map((a) => ({ id: a.id })) : undefined,
                         },
                     })),
                 },
@@ -60,9 +58,9 @@ export async function PUT(request: Request) {
 
         const resultWithAllergenNames = {
             ...updatedShop,
-            ramen: updatedShop.ramen.map((r) => ({
+            ramen: updatedShop.ramen.map((r: Ramen) => ({
                 ...r,
-                allergens: r.allergens.map((a) => ({
+                allergens: r.allergens.map((a: Allergen) => ({
                     id: a.id,
                     name: a.name,
                 })),
@@ -83,17 +81,17 @@ export async function PUT(request: Request) {
 // DELETE: Delete a shop by ID
 export async function DELETE(
     request: Request,
-    context: { params: Promise<{ id: string }> } // Ensure `context.params` is correctly typed
+    context: { params: { id: string } } // Fix context.params type
 ): Promise<Response> {
     try {
-        const { id } = await context.params;
+        const { id } = context.params;
 
         if (!id) {
             return NextResponse.json({ error: "ID is required" }, { status: 400 });
         }
 
         await prisma.shop.delete({
-            where: { id: Number(id) }, // Convert `id` to a number if necessary
+            where: { id: Number(id) }, // Remove Number(id) if Prisma uses string IDs
         });
 
         return NextResponse.json({ message: "Shop deleted successfully" });
