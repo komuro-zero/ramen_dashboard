@@ -16,12 +16,6 @@ type Ramen = {
     allergens: Allergen[];
 };
 
-// type Shop = {
-//     id: string;
-//     name: string;
-//     address: string;
-//     ramen: Ramen[];
-// };
 
 
 // PUT: Update a shop and its ramen
