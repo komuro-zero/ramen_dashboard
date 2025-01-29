@@ -3,18 +3,18 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// type Allergen = {
-//     id: string;
-//     name: string;
-// };
+type Allergen = {
+    id: string;
+    name: string;
+};
 
-// type Ramen = {
-//     id: string;
-//     name: string;
-//     description: string;
-//     price: number;
-//     allergens: Allergen[];
-// };
+type Ramen = {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    allergens: Allergen[];
+};
 
 // type Shop = {
 //     id: string;
