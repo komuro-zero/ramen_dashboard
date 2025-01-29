@@ -4,18 +4,24 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 type Allergen = {
-    id: string;
+    id: number;
     name: string;
 };
 
 type Ramen = {
-    id: string;
+    id: number;
     name: string;
-    description: string;
+    description: string | null;
     price: number;
     allergens: Allergen[];
 };
 
+// type Shop = {
+//     id: string;
+//     name: string;
+//     address: string;
+//     ramen: Ramen[];
+// };
 
 
 // PUT: Update a shop and its ramen
@@ -54,7 +60,7 @@ export async function PUT(request: Request) {
 
         const resultWithAllergenNames = {
             ...updatedShop,
-            ramen: updatedShop.ramen.map((r) => ({
+            ramen: updatedShop.ramen.map((r: Ramen) => ({
                 ...r,
                 allergens: r.allergens.map((a) => ({
                     id: a.id,
