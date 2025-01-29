@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Change to your database type if needed
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  name       String
+  isAdmin    Boolean  @default(false) // Indicates if the user is an admin
+  isApproved Boolean  @default(false) // Indicates if the user's account is approved
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Shop {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String
+  ramen     Ramen[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ramen {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  shopId      Int
+  shop        Shop       @relation(fields: [shopId], references: [id])
+  allergens   Allergen[] @relation("RamenAllergens")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Allergen {
+  id    Int     @id @default(autoincrement())
+  name  String  @unique
+  ramen Ramen[] @relation("RamenAllergens")
+}
