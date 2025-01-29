@@ -8,6 +8,7 @@ async function verifyToken(token: string) {
     try {
         const secret = new TextEncoder().encode(JWT_SECRET);
         const { payload } = await jwtVerify(token, secret);
+        console.log("Decoded Payload:", payload); // Log the decoded payload
         return payload; // Return the decoded payload if verification succeeds
     } catch (err) {
         return null; // Return null if verification fails
@@ -26,12 +27,14 @@ export async function middleware(request: NextRequest) {
         const payload = await verifyToken(token);
 
         if (!payload) {
+            console.log("Token verification failed");
             // If token verification fails, redirect to login
             return NextResponse.redirect(new URL("/login", request.url));
         }
 
         // Protect the /admin route
         if (request.nextUrl.pathname.startsWith("/admin")) {
+            console.log("Verifying admin status");
             // Redirect non-admin users trying to access the admin panel
             if (!payload.isAdmin) {
                 return NextResponse.redirect(new URL("/", request.url));
@@ -40,6 +43,7 @@ export async function middleware(request: NextRequest) {
 
         // Redirect authenticated users away from login/signup
         if (["/login", "/signup"].includes(request.nextUrl.pathname)) {
+            console.log("Redirecting from login/signup");
             return NextResponse.redirect(new URL("/", request.url));
         }
     }
@@ -48,5 +52,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/((?!api|_next/static|favicon.ico).*)"], // Protect all pages except API, static files, etc.
+    matcher: ["/((?!api|_next/static|favicon.ico|login|signup).*)"], // Protect all pages except API, static files, etc.
 };
