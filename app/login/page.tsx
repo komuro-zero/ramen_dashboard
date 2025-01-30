@@ -2,11 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation"; // Correct import for `useRouter` in the App Router
+import { motion } from "framer-motion";
+
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [isChecked, setIsChecked] = useState(false);
+    const handleClick = () => {
+        setIsChecked(!isChecked);
+    }
+
+    const mode = isChecked ? 'primary' : 'secondary';
+
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -55,12 +64,14 @@ export default function Login() {
                         required
                     />
                 </div>
-                <button
+                <motion.button
+                    whileTap={{ scale: 0.9, translateY: 5 }}
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+                    className={['w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 button', `button--${mode}`].join(' ')}
+                    onClick={handleClick}
                 >
-                    Login
-                </button>
+                    Log In
+                </motion.button>
                 <p className="mt-4 text-sm text-center">
                     Don&apos;t have an account?{" "}
                     <a href="/signup" className="text-blue-500 hover:underline">

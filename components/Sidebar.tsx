@@ -1,9 +1,14 @@
 "use client";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { useState } from "react";
 
 export default function Sidebar() {
+    const [isChecked, setIsChecked] = useState(false);
+    const mode = isChecked ? 'primary' : 'secondary';
 
     const handleLogout = async () => {
+        setIsChecked(!isChecked);
         document.cookie = "authToken=; Max-Age=0; path=/;";
         localStorage.removeItem("authToken");
         sessionStorage.removeItem("authToken");
@@ -16,6 +21,7 @@ export default function Sidebar() {
             }, 500);
         }
     };
+
 
     return (
         <div className="w-64 h-screen bg-gradient-to-b from-gray-800 to-gray-900 text-white flex flex-col shadow-lg sticky top-0">
@@ -43,12 +49,20 @@ export default function Sidebar() {
                 </Link>
             </nav>
             <footer className="mt-auto p-4 border-t border-gray-700 text-sm text-gray-400">
-                <button
+                {/* <button
                     onClick={handleLogout}
                     className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition duration-300"
                 >
                     Logout
-                </button>
+                </button> */}
+                <motion.button
+                    whileTap={{ scale: 0.9, translateY: 5 }}
+                    type="submit"
+                    className={['w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 button', `button--${mode}`].join(' ')}
+                    onClick={handleLogout}
+                >
+                    Log Out
+                </motion.button>
                 <p className="mt-4 text-center">Tokyo Ramen Tours</p>
             </footer>
         </div>
