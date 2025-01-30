@@ -19,6 +19,10 @@ export async function POST(req: NextRequest) {
             where: { email },
         });
 
+        // if (user?.isApproved === false) {
+        //     return NextResponse.json({ message: "User is not approved" }, { status: 403 });
+        // }
+
         if (!user) {
             return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
         }
