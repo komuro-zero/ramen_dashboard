@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
+// Define types
 type Allergen = {
   id: string;
   name: string;
@@ -10,7 +12,7 @@ type Allergen = {
 type Ramen = {
   id: string;
   name: string;
-  allergens: Allergen[]; // Array of allergens
+  allergens: Allergen[];
 };
 
 type Shop = {
@@ -25,12 +27,14 @@ type AllergyOption = {
   name: string;
 };
 
-
 export default function SearchPage() {
   const [allergies, setAllergies] = useState<string[]>([]);
   const [results, setResults] = useState<Shop[]>([]);
-  const [allergyOptions, setAllergyOptions] = useState<AllergyOption[]>([]); // Use any[] for now
+  const [allergyOptions, setAllergyOptions] = useState<AllergyOption[]>([]);
+  const [loadingAllergens, setLoadingAllergens] = useState(true);
+  const [loadingResults, setLoadingResults] = useState(false);
 
+  // Fetch Allergens
   useEffect(() => {
     async function fetchAllergens() {
       try {
@@ -39,6 +43,8 @@ export default function SearchPage() {
         setAllergyOptions(data);
       } catch (error) {
         console.error("Error fetching allergens:", error);
+      } finally {
+        setLoadingAllergens(false);
       }
     }
     fetchAllergens();
@@ -51,18 +57,21 @@ export default function SearchPage() {
   };
 
   const fetchResults = async () => {
+    setLoadingResults(true);
     try {
       const response = await fetch(`/api/search?allergies=${allergies.join(",")}`);
       const data = await response.json();
       setResults(data);
     } catch (error) {
       console.error("Error fetching results:", error);
+    } finally {
+      setLoadingResults(false);
     }
   };
 
-  const isShopUnavailable = (ramenBowls: any[]) => {
+  const isShopUnavailable = (ramenBowls: Ramen[]) => {
     return ramenBowls.every((bowl) =>
-      bowl.allergens.some((allergen: any) => allergies.includes(allergen.name))
+      bowl.allergens.some((allergen) => allergies.includes(allergen.name))
     );
   };
 
@@ -70,26 +79,35 @@ export default function SearchPage() {
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6 text-center">Search Restaurants</h1>
 
+      {/* Allergen Selection */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Select Allergies:</h2>
         <div className="flex flex-wrap gap-4">
-          {allergyOptions.map((allergen) => (
-            <button
-              key={allergen.id} // Use allergen.id as key
-              onClick={() => toggleAllergy(allergen.name)} // Toggle by name
-              className={`px-3 py-1 rounded-lg cursor-pointer 
-                ${allergies.includes(allergen.name) // Check inclusion by name
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-700"
-                }
+          {loadingAllergens ? (
+            // Skeleton Loader for Allergens
+            Array.from({ length: 5 }).map((_, index) => (
+              <div
+                key={index}
+                className="w-24 h-8 bg-gray-300 rounded-lg animate-pulse"
+              ></div>
+            ))
+          ) : (
+            allergyOptions.map((allergen) => (
+              <button
+                key={allergen.id}
+                onClick={() => toggleAllergy(allergen.name)}
+                className={`px-3 py-1 rounded-lg cursor-pointer 
+                ${allergies.includes(allergen.name) ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700"}
                 hover:bg-blue-500 hover:text-white`}
-            >
-              {allergen.name}
-            </button>
-          ))}
+              >
+                {allergen.name}
+              </button>
+            ))
+          )}
         </div>
       </div>
 
+      {/* Search Button */}
       <button
         onClick={fetchResults}
         className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -97,6 +115,17 @@ export default function SearchPage() {
         Search
       </button>
 
+      {/* Loading Modal */}
+      {loadingResults && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <div className="w-12 h-12 border-t-4 border-blue-600 border-solid rounded-full animate-spin"></div>
+            <p className="mt-4 text-lg font-semibold text-gray-700">Loading results...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Results Section */}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Results:</h2>
         {results.length > 0 ? (
@@ -106,8 +135,7 @@ export default function SearchPage() {
               return (
                 <div
                   key={shop.id}
-                  className={`border rounded-lg shadow-md p-4 bg-white ${unavailable ? "opacity-50" : ""
-                    }`}
+                  className={`border rounded-lg shadow-md p-4 bg-white ${unavailable ? "opacity-50" : ""}`}
                 >
                   <h3 className="text-lg font-bold mb-2">
                     {shop.name} {unavailable && "🚫"}
@@ -118,20 +146,17 @@ export default function SearchPage() {
                     {shop.ramen.map((bowl) => (
                       <li
                         key={bowl.id}
-                        className={`p-2 rounded-lg ${bowl.allergens.some((allergen: any) =>
-                          allergies.includes(allergen.name)
-                        )
+                        className={`p-2 rounded-lg ${bowl.allergens.some((allergen) => allergies.includes(allergen.name))
                           ? "bg-red-100 text-red-600"
                           : "bg-green-100 text-green-600"
                           }`}
                       >
                         <div className="font-medium">{bowl.name}</div>
-                        {bowl.allergens.length > 0 && (
+                        {bowl.allergens.length > 0 ? (
                           <div className="text-sm">
                             Allergens: {bowl.allergens.map((a) => a.name).join(", ")}
                           </div>
-                        )}
-                        {bowl.allergens.length === 0 && (
+                        ) : (
                           <div className="text-sm">No allergens 🎉</div>
                         )}
                       </li>
