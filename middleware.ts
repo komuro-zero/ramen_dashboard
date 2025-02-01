@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
     const token = request.cookies.get("authToken")?.value;
     if (!token) {
         // Redirect unauthenticated users trying to access protected pages
-        if (!["/login", "/signup"].includes(request.nextUrl.pathname)) {
+        if (!["/login", "/signup", "/"].includes(request.nextUrl.pathname)) {
             return NextResponse.redirect(new URL("/login", request.url));
         }
     } else {

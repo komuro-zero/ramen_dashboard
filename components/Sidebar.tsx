@@ -18,7 +18,7 @@ export default function Sidebar() {
             // Wait for cookie deletion to propagate before redirecting
             setTimeout(() => {
                 window.location.href = "/login";
-            }, 500);
+            }, 0);
         }
     };
 
@@ -29,12 +29,12 @@ export default function Sidebar() {
                 Admin Panel
             </h2>
             <nav className="flex flex-col flex-grow">
-                <Link
+                {/* <Link
                     href="/dashboard/main"
                     className="p-4 hover:bg-gray-700 hover:text-teal-400 transition duration-200"
                 >
                     Search Allergies
-                </Link>
+                </Link> */}
                 <Link
                     href="/dashboard/shops"
                     className="p-4 hover:bg-gray-700 hover:text-teal-400 transition duration-200"
