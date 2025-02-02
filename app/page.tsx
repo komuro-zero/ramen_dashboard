@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { LoadingModal } from "@/components/LoadingModal";
 
 // Define types
 type Allergen = {
@@ -51,14 +52,18 @@ export default function SearchPage() {
 
   const toggleAllergy = (allergy: string) => {
     setAllergies((prev) =>
-      prev.includes(allergy) ? prev.filter((a) => a !== allergy) : [...prev, allergy]
+      prev.includes(allergy)
+        ? prev.filter((a) => a !== allergy)
+        : [...prev, allergy]
     );
   };
 
   const fetchResults = async () => {
     setLoadingResults(true);
     try {
-      const response = await fetch(`/api/search?allergies=${allergies.join(",")}`);
+      const response = await fetch(
+        `/api/search?allergies=${allergies.join(",")}`
+      );
       const data = await response.json();
       setResults(data);
     } catch (error) {
@@ -76,33 +81,37 @@ export default function SearchPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Search Restaurants</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Search Restaurants
+      </h1>
 
       {/* Allergen Selection */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Select Allergies:</h2>
         <div className="flex flex-wrap gap-4">
-          {loadingAllergens ? (
-            // Skeleton Loader for Allergens
-            Array.from({ length: 5 }).map((_, index) => (
-              <div
-                key={index}
-                className="w-24 h-8 bg-gray-300 rounded-lg animate-pulse"
-              ></div>
-            ))
-          ) : (
-            allergyOptions.map((allergen) => (
-              <button
-                key={allergen.id}
-                onClick={() => toggleAllergy(allergen.name)}
-                className={`px-3 py-1 rounded-lg cursor-pointer 
-                ${allergies.includes(allergen.name) ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-700"}
+          {loadingAllergens
+            ? // Skeleton Loader for Allergens
+              Array.from({ length: 5 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="w-24 h-8 bg-gray-300 rounded-lg animate-pulse"
+                ></div>
+              ))
+            : allergyOptions.map((allergen) => (
+                <button
+                  key={allergen.id}
+                  onClick={() => toggleAllergy(allergen.name)}
+                  className={`px-3 py-1 rounded-lg cursor-pointer 
+                ${
+                  allergies.includes(allergen.name)
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700"
+                }
                 hover:bg-blue-500 hover:text-white`}
-              >
-                {allergen.name}
-              </button>
-            ))
-          )}
+                >
+                  {allergen.name}
+                </button>
+              ))}
         </div>
       </div>
 
@@ -115,14 +124,7 @@ export default function SearchPage() {
       </button>
 
       {/* Loading Modal */}
-      {loadingResults && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
-            <div className="w-12 h-12 border-t-4 border-blue-600 border-solid rounded-full animate-spin"></div>
-            <p className="mt-4 text-lg font-semibold text-gray-700">Loading results...</p>
-          </div>
-        </div>
-      )}
+      {loadingResults && <LoadingModal message="Fetching results..." />}
 
       {/* Results Section */}
       <div className="mt-8">
@@ -134,7 +136,9 @@ export default function SearchPage() {
               return (
                 <div
                   key={shop.id}
-                  className={`border rounded-lg shadow-md p-4 bg-white ${unavailable ? "opacity-50" : ""}`}
+                  className={`border rounded-lg shadow-md p-4 bg-white ${
+                    unavailable ? "opacity-50" : ""
+                  }`}
                 >
                   <h3 className="text-lg font-bold mb-2">
                     {shop.name} {unavailable && "🚫"}
@@ -145,15 +149,19 @@ export default function SearchPage() {
                     {shop.ramen.map((bowl) => (
                       <li
                         key={bowl.id}
-                        className={`p-2 rounded-lg ${bowl.allergens.some((allergen) => allergies.includes(allergen.name))
-                          ? "bg-red-100 text-red-600"
-                          : "bg-green-100 text-green-600"
-                          }`}
+                        className={`p-2 rounded-lg ${
+                          bowl.allergens.some((allergen) =>
+                            allergies.includes(allergen.name)
+                          )
+                            ? "bg-red-100 text-red-600"
+                            : "bg-green-100 text-green-600"
+                        }`}
                       >
                         <div className="font-medium">{bowl.name}</div>
                         {bowl.allergens.length > 0 ? (
                           <div className="text-sm">
-                            Allergens: {bowl.allergens.map((a) => a.name).join(", ")}
+                            Allergens:{" "}
+                            {bowl.allergens.map((a) => a.name).join(", ")}
                           </div>
                         ) : (
                           <div className="text-sm">No allergens 🎉</div>
@@ -166,7 +174,9 @@ export default function SearchPage() {
             })}
           </div>
         ) : (
-          <p className="text-gray-500">No results found. Try removing some allergy filters.</p>
+          <p className="text-gray-500">
+            No results found. Try removing some allergy filters.
+          </p>
         )}
       </div>
     </div>
