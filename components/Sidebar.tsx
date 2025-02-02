@@ -1,13 +1,28 @@
 "use client";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LoadingModal } from "./LoadingModal";
 
 export default function Sidebar() {
   const [isChecked, setIsChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const mode = isChecked ? "primary" : "secondary";
+
+  useEffect(() => {
+    async function fetchUserRole() {
+      try {
+        const res = await fetch("/api/auth/verify");
+        if (!res.ok) throw new Error("Failed to verify user");
+        const data = await res.json();
+        setIsAdmin(data.isAdmin);
+      } catch (error) {
+        console.error("Error verifying JWT token:", error);
+      }
+    }
+    fetchUserRole();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -20,7 +35,6 @@ export default function Sidebar() {
 
       const response = await fetch(`/api/logout`, { method: "POST" });
       if (response.ok) {
-        // Wait for cookie deletion to propagate before redirecting
         setTimeout(() => {
           window.location.href = "/login";
         }, 0);
@@ -39,12 +53,6 @@ export default function Sidebar() {
         Admin Panel
       </h2>
       <nav className="flex flex-col flex-grow">
-        {/* <Link
-                    href="/dashboard/main"
-                    className="p-4 hover:bg-gray-700 hover:text-teal-400 transition duration-200"
-                >
-                    Search Allergies
-                </Link> */}
         <Link
           href="/dashboard/shops"
           className="p-4 hover:bg-gray-700 hover:text-teal-400 transition duration-200"
@@ -57,14 +65,16 @@ export default function Sidebar() {
         >
           Manage Allergens
         </Link>
+        {isAdmin && (
+          <Link
+            href="/dashboard/admin"
+            className="p-4 hover:bg-gray-700 hover:text-teal-400 transition duration-200"
+          >
+            Admin Panel
+          </Link>
+        )}
       </nav>
       <footer className="mt-auto p-4 border-t border-gray-700 text-sm text-gray-400">
-        {/* <button
-                    onClick={handleLogout}
-                    className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition duration-300"
-                >
-                    Logout
-                </button> */}
         <motion.button
           whileTap={{ scale: 0.9, translateY: 5 }}
           type="submit"

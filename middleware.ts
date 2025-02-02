@@ -5,47 +5,52 @@ import { jwtVerify } from "jose";
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 async function verifyToken(token: string) {
-    try {
-        const secret = new TextEncoder().encode(JWT_SECRET);
-        const { payload } = await jwtVerify(token, secret);
-        return payload; // Return the decoded payload if verification succeeds
-    } catch (err) {
-        return null; // Return null if verification fails
-    }
+  try {
+    const secret = new TextEncoder().encode(JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
+    return payload; // Return the decoded payload if verification succeeds
+  } catch (err) {
+    console.log("Error verifying token:", err);
+    return null; // Return null if verification fails
+  }
 }
 
 export async function middleware(request: NextRequest) {
-    const token = request.cookies.get("authToken")?.value;
-    if (!token) {
-        // Redirect unauthenticated users trying to access protected pages
-        if (!["/login", "/signup", "/"].includes(request.nextUrl.pathname)) {
-            return NextResponse.redirect(new URL("/login", request.url));
-        }
-    } else {
-        const payload = await verifyToken(token);
+  const token = request.cookies.get("authToken")?.value;
+  if (!token) {
+    // Redirect unauthenticated users trying to access protected pages
+    if (!["/login", "/signup", "/"].includes(request.nextUrl.pathname)) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  } else {
+    const payload = await verifyToken(token);
 
-        if (!payload) {
-            // If token verification fails, redirect to login
-            return NextResponse.redirect(new URL("/login", request.url));
-        }
-
-        // Protect the /admin route
-        if (request.nextUrl.pathname.startsWith("/admin")) {
-            // Redirect non-admin users trying to access the admin panel
-            if (!payload.isAdmin) {
-                return NextResponse.redirect(new URL("/", request.url));
-            }
-        }
-
-        // Redirect authenticated users away from login/signup
-        if (["/login", "/signup"].includes(request.nextUrl.pathname)) {
-            return NextResponse.redirect(new URL("/", request.url));
-        }
+    if (!payload) {
+      // If token verification fails, redirect to login
+      return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    return NextResponse.next();
+    // Protect the /admin route
+    if (
+      request.nextUrl.pathname.startsWith("/admin") ||
+      request.nextUrl.pathname.startsWith("/dashboard/admin")
+    ) {
+      console.log("Payload:", payload);
+      // Redirect non-admin users trying to access the admin panel
+      if (!payload.isAdmin) {
+        return NextResponse.redirect(new URL("/dashboard/shops", request.url));
+      }
+    }
+
+    // Redirect authenticated users away from login/signup
+    if (["/login", "/signup"].includes(request.nextUrl.pathname)) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/((?!api|_next/static|favicon.ico|login|signup).*)"], // Protect all pages except API, static files, etc.
+  matcher: ["/((?!api|_next/static|favicon.ico|login|signup).*)"], // Protect all pages except API, static files, etc.
 };
