@@ -1,8 +1,24 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 
 async function main() {
+    // Hash the password
+    const password = 'wrvnaosjk@w';
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create an admin user
+    const adminUser = await prisma.user.create({
+        data: {
+            email: 'skskzkkszs@gmail.com',
+            password: hashedPassword,
+            name: 'Admin User', // You can change the name
+            isAdmin: true,
+            isApproved: true,
+        },
+    });
+
     // Define ramen shops
     const shops = [
         {
