@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { LoadingModal } from "@/components/LoadingModal";
+import { motion } from "framer-motion";
 
 interface Allergen {
   id: number;
@@ -97,9 +98,11 @@ export default function ManageAllergens() {
 
       {/* Allergen List */}
       <ul>
-        {allergens.map((allergen) => (
-          <li
-            key={allergen.id}
+        {allergens.map((allergen, index) => (
+          <motion.li
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: index * 0.1, duration: 0.5 }}
             className="flex justify-between items-center p-4 mb-2 bg-white rounded shadow"
           >
             {isEditing && editAllergen?.id === allergen.id ? (
@@ -143,7 +146,7 @@ export default function ManageAllergens() {
                 Delete
               </button>
             </div>
-          </li>
+          </motion.li>
         ))}
       </ul>
     </div>

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { LoadingModal } from "@/components/LoadingModal";
+import { motion } from "framer-motion";
+
 
 interface Shop {
   id: number;
@@ -29,6 +31,9 @@ export default function ManageShops() {
   const [editShop, setEditShop] = useState<Shop | null>(null);
   const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [editRamen, setEditRamen] = useState<Ramen[]>([]);
+  const [shopToDelete, setShopToDelete] = useState<Shop | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+
 
   useEffect(() => {
     async function fetchData() {
@@ -39,6 +44,32 @@ export default function ManageShops() {
     }
     fetchData();
   }, []);
+
+  const handleDeleteShop = async () => {
+    if (!shopToDelete) return;
+
+    try {
+      console.log("Deleting shop:", shopToDelete);
+      const res = await fetch(`/api/shops`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: shopToDelete.id }),
+      });
+
+      if (!res.ok) {
+        console.error(`Failed to delete shop: ${res.status} ${res.statusText}`);
+        alert("Failed to delete the shop. Please try again.");
+        return;
+      }
+
+      setShops((prev) => prev.filter((s) => s.id !== shopToDelete.id));
+      setIsConfirmOpen(false);
+      setShopToDelete(null);
+    } catch (error) {
+      console.error("Error deleting shop:", error);
+      alert("An error occurred while deleting the shop.");
+    }
+  };
 
   const handleSave = async () => {
     const payload = {
@@ -113,33 +144,58 @@ export default function ManageShops() {
       prev.map((ramen) =>
         ramen.id === ramenId
           ? {
-              ...ramen,
-              allergens: ramen.allergens.some((a) => a.id === allergenId)
-                ? ramen.allergens.filter((a) => a.id !== allergenId)
-                : [
-                    ...ramen.allergens,
-                    allergens.find((a) => a.id === allergenId)!,
-                  ],
-            }
+            ...ramen,
+            allergens: ramen.allergens.some((a) => a.id === allergenId)
+              ? ramen.allergens.filter((a) => a.id !== allergenId)
+              : [
+                ...ramen.allergens,
+                allergens.find((a) => a.id === allergenId)!,
+              ],
+          }
           : ramen
       )
     );
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen p-6">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">Manage Shops</h1>
-      <button
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="bg-gray-100 min-h-screen p-6"
+    >
+      <motion.h1
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="text-3xl font-bold mb-6 text-gray-800"
+      >
+        Manage Shops
+      </motion.h1>
+      <motion.button
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={handleAddShop}
         className="px-4 py-2 bg-blue-600 text-white rounded mb-6 shadow-md hover:bg-blue-700 transition duration-300"
       >
         Add Shop
-      </button>
+      </motion.button>
       {shops.length === 0 && <LoadingModal message="Loading Shops..." />}
-      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {shops.map((shop) => (
-          <li
+      <motion.ul
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ staggerChildren: 0.1 }}
+      >
+        {shops.map((shop, index) => (
+          <motion.li
             key={shop.id}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: index * 0.1, duration: 0.5 }}
             className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition duration-300 relative"
           >
             <div className="flex justify-between items-center">
@@ -183,9 +239,9 @@ export default function ManageShops() {
                 </li>
               ))}
             </ul>
-          </li>
+          </motion.li>
         ))}
-      </ul>
+      </motion.ul>
 
       {isModalOpen && (
         <div
@@ -209,7 +265,11 @@ export default function ManageShops() {
             >
               <h2 className="text-xl font-bold mb-4">
                 {editShop && editShop.id ? "Edit Shop" : "Add Shop"}
+                <motion.button onClick={() => { setShopToDelete(editShop); setIsConfirmOpen(true); }} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">
+                  Delete
+                </motion.button>
               </h2>
+
 
               {/* Shop Name */}
               <label className="block font-semibold text-gray-800 mb-2">
@@ -323,7 +383,7 @@ export default function ManageShops() {
                   <button
                     onClick={() => handleDeleteRamen(ramen.id)}
                     type="button"
-                    className="mt-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300"
+                    className="mt-2 px-3 py-1 bg-red-300 text-white rounded hover:bg-red-600 transition duration-300"
                   >
                     Remove Ramen
                   </button>
@@ -359,6 +419,18 @@ export default function ManageShops() {
           </div>
         </div>
       )}
-    </div>
+      {isConfirmOpen && (
+        <motion.div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <motion.div className="bg-white rounded-lg shadow-lg p-6 max-w-sm">
+            <h2 className="text-lg font-bold mb-4">Confirm Delete</h2>
+            <p>Are you sure you want to delete this shop?</p>
+            <div className="flex justify-end space-x-4 mt-4">
+              <button onClick={() => setIsConfirmOpen(false)} className="px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
+              <button onClick={handleDeleteShop} className="px-4 py-2 bg-red-600 text-white rounded">Delete</button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </motion.div>
   );
 }

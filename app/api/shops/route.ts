@@ -111,9 +111,12 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
     try {
         const { id } = await request.json();
+        console.log("Received DELETE request for shop with id:", id);
+        console.log(typeof id)
         await prisma.shop.delete({
             where: { id },
         });
+        console.log("Shop deleted successfully");
         return NextResponse.json({ message: "Shop deleted successfully" });
     } catch (error) {
         console.error("Error deleting shop:", error);
