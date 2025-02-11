@@ -84,7 +84,7 @@ export default function SearchPage() {
               key={allergen.id}
               onClick={() => toggleAllergy(allergen.name)}
               className={`px-4 py-2 rounded-lg cursor-pointer border-2 border-blue-500 text-blue-900 font-semibold 
-              ${allergies.includes(allergen.name) ? "bg-blue-600 text-white" : "bg-white hover:bg-blue-500 hover:text-white"}`}
+              ${allergies.includes(allergen.name) ? "bg-blue-600 text-white" : "bg-white"}`}
             >
               {allergen.name}
             </button>
