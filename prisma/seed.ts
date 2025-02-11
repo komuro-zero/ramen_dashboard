@@ -4,70 +4,110 @@ const bcrypt = require('bcrypt');
 const prisma = new PrismaClient();
 
 async function main() {
-    // Hash the password
-    const password = 'wrvnaosjk@w';
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create an admin user
-    const adminUser = await prisma.user.create({
-        data: {
-            email: 'skskzkkszs@gmail.com',
-            password: hashedPassword,
-            name: 'Admin User', // You can change the name
-            isAdmin: true,
-            isApproved: true,
-        },
-    });
-
-    // Define ramen shops
     const shops = [
         {
-            name: 'Shinbu',
-            address: '123 Shinbu St, Tokyo',
+            name: "Shinbu Sakiya",
+            address: "123 Shinbu St, Tokyo",
             ramen: [
-                { name: 'Bowl 1', price: 1000, allergens: ['Fish', 'Almonds and Nuts'] },
-                { name: 'Bowl 2', price: 950, allergens: ['Fish'] },
-                { name: 'Bowl 3', price: 1100, allergens: ['Fish'] },
-                { name: 'Vegan Bowl', price: 1200, allergens: [] },
+                { name: "Shoyu", price: 1000, allergens: ["Fish", "Pork", "Chicken", "Fish"] },
+                { name: "Shio", price: 1000, allergens: ["Fish", "Pork", "Chicken", "Fish"] },
+                { name: "Miso", price: 1000, allergens: ["Fish", "Pork", "Chicken", "Fish", "Almonds and Nuts"] },
+                { name: "Spicy Miso", price: 1100, allergens: ["Fish", "Pork", "Chicken", "Fish", "Almonds and Nuts"] },
+                { name: "Vegan Shoyu", price: 1200, allergens: [] },
+                { name: "Vegan Shio", price: 1200, allergens: [] },
+                { name: "Vegan Miso", price: 1200, allergens: [] },
+                { name: "Vegan Spicy Miso", price: 1300, allergens: [] },
             ],
         },
         {
-            name: 'Mensho',
-            address: '456 Mensho Ave, Tokyo',
+            name: "Nagi Butao",
+            address: "456 Nagi St, Tokyo",
             ramen: [
-                { name: 'Tori Paitan', price: 1300, allergens: ['Almonds and Nuts', 'Milk'] },
-                { name: 'Matcha Paitan', price: 1250, allergens: ['Almonds and Nuts', 'Milk'] },
-                { name: 'Vegan Tantanmen (Soupless)', price: 1150, allergens: [] },
-                { name: 'Vegan Tantanmen (With Soup)', price: 1150, allergens: [] },
+                { name: "Original King", price: 1000, allergens: ["Pork", "Shellfish", "Egg"] },
+                { name: "Red King", price: 1000, allergens: ["Pork", "Egg"] },
+                { name: "Green King", price: 1100, allergens: ["Pork", "Shellfish", "Egg"] },
+                { name: "Black King", price: 1200, allergens: ["Pork", "Egg"] },
             ],
         },
         {
-            name: 'Ecchan',
-            address: '789 Ecchan Rd, Tokyo',
+            name: "Shuichi",
+            address: "789 Shuichi Rd, Tokyo",
             ramen: [
-                { name: 'Curry Ramen', price: 1000, allergens: ['Egg', 'Milk'] },
-                { name: 'Abura Soba', price: 900, allergens: ['Egg'] },
-                { name: 'Spicy Miso', price: 950, allergens: ['Milk'] },
+                { name: "Curry Ramen", price: 1000, allergens: ["Beef", "Pork", "Chicken", "Milk", "Shellfish"] },
+                { name: "Curry Abura Soba", price: 950, allergens: ["Beef", "Pork", "Chicken", "Shellfish", "Fish"] },
+                { name: "Black Sesame Tantanmen", price: 1100, allergens: ["Beef", "Pork", "Chicken", "Milk", "Shellfish", "Fish"] },
+                { name: "Spicy Miso", price: 1050, allergens: ["Beef", "Pork", "Chicken", "Milk", "Shellfish"] },
             ],
         },
         {
-            name: 'Shuichi',
-            address: '101 Shuichi Blvd, Tokyo',
+            name: "Ecchan",
+            address: "101 Ecchan Blvd, Tokyo",
             ramen: [
-                { name: 'Chuukasoba', price: 950, allergens: ['Beef', 'Fish'] },
-                { name: 'Tantanmen', price: 1100, allergens: ['Milk', 'Shellfish'] },
-                { name: 'Spicy Miso', price: 1000, allergens: ['Fish'] },
-                { name: 'Abura Soba', price: 850, allergens: [] },
+                { name: "Chuuka Soba", price: 950, allergens: ["Pork", "Chicken"] },
+                { name: "Karami Chuuka", price: 1000, allergens: ["Pork", "Chicken"] },
+                { name: "Mori Soba", price: 1050, allergens: ["Pork", "Chicken"] },
             ],
         },
         {
-            name: 'Tomo',
-            address: '202 Tomo St, Tokyo',
+            name: "Mensho",
+            address: "Tokyo",
             ramen: [
-                { name: 'Truffle Chicken Chuukasoba', price: 1500, allergens: ['Milk', 'Shellfish'] },
-                { name: 'Cheese Maze Soba', price: 1400, allergens: ['Milk', 'Shellfish'] },
-                { name: 'Shio Chuukasoba', price: 1000, allergens: ['Fish'] },
-                { name: 'Tsukesoba', price: 1200, allergens: ['Fish'] },
+                { name: "Shio Chuukasoba", price: 1200, allergens: ["Pork", "Shellfish"] },
+                { name: "Tori Paitan", price: 1300, allergens: ["Chicken", "Almonds and Nuts"] },
+                { name: "Matcha Paitan", price: 1350, allergens: ["Chicken", "Almonds and Nuts"] },
+                { name: "Wagyu Tantanmen", price: 1400, allergens: ["Pork", "Shellfish", "Almonds and Nuts"] },
+                { name: "Vegan Tantanmen", price: 1200, allergens: ["Almonds and Nuts"] },
+                { name: "Vegan Soupless Tantanmen", price: 1150, allergens: ["Almonds and Nuts"] },
+            ],
+        },
+        {
+            name: "Tomo Premium",
+            address: "202 Tomo St, Tokyo",
+            ramen: [
+                { name: "Flying Fish Chuukasoba", price: 1300, allergens: ["Pork", "Beef", "Chicken", "Fish", "Egg"] },
+                { name: "Truffle Chicken Chuukasoba", price: 1500, allergens: ["Pork", "Beef", "Chicken", "Shellfish", "Fish", "Egg"] },
+                { name: "Flying Fish Tsukesoba", price: 1350, allergens: ["Pork", "Beef", "Chicken", "Fish", "Egg"] },
+                { name: "Pecorino Romano Maze Soba", price: 1400, allergens: ["Pork", "Chicken", "Shellfish", "Fish", "Egg"] },
+            ],
+        },
+        {
+            name: "Atariya Shokudo",
+            address: "Osaka",
+            ramen: [
+                { name: "Champon", price: 1450, allergens: ["Pork", "Chicken", "Shellfish", "Fish"] },
+                { name: "Spicy Champon", price: 1500, allergens: ["Pork", "Chicken", "Shellfish", "Fish"] },
+                { name: "Ramen", price: 1300, allergens: ["Egg", "Chicken"] },
+                { name: "Rairaimen", price: 1200, allergens: ["Pork", "Chicken"] },
+            ],
+        },
+        {
+            name: "Aidaya",
+            address: "Nagoya",
+            ramen: [
+                { name: "Tonkotsu Gyoukai", price: 1250, allergens: ["Pork", "Fish"] },
+                { name: "Shrimp Ramen", price: 1300, allergens: ["Pork", "Shellfish", "Fish"] },
+                { name: "Garlic Shoyu", price: 1100, allergens: ["Pork", "Fish"] },
+                { name: "Tantanmen", price: 1200, allergens: ["Pork", "Fish"] },
+            ],
+        },
+        {
+            name: "Kakashi",
+            address: "Tokyo",
+            ramen: [
+                { name: "Tori Chintan Shio", price: 1000, allergens: ["Chicken", "Shellfish", "Fish"] },
+                { name: "Tori Chintan Shoyu", price: 1050, allergens: ["Chicken", "Fish"] },
+                { name: "Tantanmen", price: 1100, allergens: ["Chicken", "Shellfish", "Fish"] },
+                { name: "Tori Paitan Shio", price: 1150, allergens: ["Chicken", "Shellfish", "Fish"] },
+            ],
+        },
+        {
+            name: "Inose",
+            address: "Osaka",
+            ramen: [
+                { name: "The Default", price: 1100, allergens: ["Pork", "Chicken", "Shellfish", "Fish"] },
+                { name: "Tokyo Classic", price: 1150, allergens: ["Pork", "Chicken", "Fish"] },
+                { name: "Mushroom Daikon", price: 1200, allergens: ["Pork", "Chicken", "Fish"] },
+                { name: "Cold Soy Milk Tantan", price: 1300, allergens: ["Pork", "Chicken", "Fish"] },
             ],
         },
     ];
@@ -77,7 +117,7 @@ async function main() {
         const createdShop = await prisma.shop.create({
             data: {
                 name: shop.name,
-                address: shop.address, // Address field added
+                address: shop.address,
                 ramen: {
                     create: shop.ramen.map((bowl) => ({
                         name: bowl.name,
@@ -96,7 +136,7 @@ async function main() {
         console.log(`Created shop: ${createdShop.name}`);
     }
 
-    console.log('Seeding completed!');
+    console.log("Seeding completed!");
 }
 
 main()
