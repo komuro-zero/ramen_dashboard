@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -25,7 +25,7 @@ type Ramen = {
 
 
 // PUT: Update a shop and its ramen
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
         const { id, name, address, ramen }: { id: string; name: string; address: string; ramen: Ramen[] } = body;
@@ -82,11 +82,12 @@ export async function PUT(request: Request) {
 
 // DELETE: Delete a shop by ID
 export async function DELETE(
-    request: Request,
+    request: NextRequest,
     context: { params: Promise<{ id: string }> } // Ensure `context.params` is correctly typed
 ): Promise<Response> {
     try {
         const { id } = await context.params;
+        console.log("Received ID:", id); // Log the received ID
 
         if (!id) {
             return NextResponse.json({ error: "ID is required" }, { status: 400 });

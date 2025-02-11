@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -26,7 +26,7 @@ export async function GET() {
 }
 
 // POST: Create a new shop
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
         const { name, address, ramen } = body;
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
 }
 
 // PUT: Update a shop and its ramen
-export async function PUT(request: Request) {
+export async function PUT(request: NextRequest) {
     try {
         const body = await request.json();
         const { id, name, address, ramen } = body;
@@ -108,13 +108,24 @@ export async function PUT(request: Request) {
 }
 
 // DELETE: Delete a shop
-export async function DELETE(request: Request) {
+export async function DELETE(request: NextRequest) {
     try {
-        const { id } = await request.json();
+        const body = await request.json();
+        const { id } = body;
+
+
+        // Validate ID
+        if (!id) {
+            return NextResponse.json({ error: "ID is required" }, { status: 400 });
+        }
+
         console.log("Received DELETE request for shop with id:", id);
-        console.log(typeof id)
+
+        // Convert to number if needed
+        const shopId = parseInt(id, 10);
+        console.log("Converted ID to number:", shopId);
         await prisma.shop.delete({
-            where: { id },
+            where: { id: shopId },
         });
         console.log("Shop deleted successfully");
         return NextResponse.json({ message: "Shop deleted successfully" });

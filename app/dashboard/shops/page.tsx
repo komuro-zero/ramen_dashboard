@@ -33,6 +33,7 @@ export default function ManageShops() {
   const [editRamen, setEditRamen] = useState<Ramen[]>([]);
   const [shopToDelete, setShopToDelete] = useState<Shop | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
 
   useEffect(() => {
@@ -49,22 +50,30 @@ export default function ManageShops() {
     if (!shopToDelete) return;
 
     try {
+      setIsDeleting(true);
+      setIsConfirmOpen(false);
+
       console.log("Deleting shop:", shopToDelete);
+      console.log("Deleting shop id:", shopToDelete.id);
       const res = await fetch(`/api/shops`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ id: shopToDelete.id }),
       });
 
       if (!res.ok) {
         console.error(`Failed to delete shop: ${res.status} ${res.statusText}`);
         alert("Failed to delete the shop. Please try again.");
+        setShopToDelete(null);
+        setIsDeleting(false);
         return;
       }
 
       setShops((prev) => prev.filter((s) => s.id !== shopToDelete.id));
-      setIsConfirmOpen(false);
       setShopToDelete(null);
+      setIsDeleting(false);
     } catch (error) {
       console.error("Error deleting shop:", error);
       alert("An error occurred while deleting the shop.");
@@ -266,6 +275,7 @@ export default function ManageShops() {
               <h2 className="text-xl font-bold mb-4">
                 {editShop && editShop.id ? "Edit Shop" : "Add Shop"}
               </h2>
+              {isDeleting && <LoadingModal message="Deleting Shop..." />}
               <motion.button onClick={() => { setShopToDelete(editShop); setIsConfirmOpen(true); }} className="mb-4 px-4 py-2 bg-red-400 text-white rounded hover:bg-red-600 transition duration-300 w-full">
                 Delete Shop
               </motion.button>
