@@ -131,15 +131,13 @@ export default function AdminPage() {
               <td className="p-4 cursor-pointer">
                 <button
                   onClick={() => openModal(user, "admin")}
-                  className={`px-3 py-1 text-white rounded-md ${
-                    user.isAdmin
+                  className={`px-3 py-1 text-white rounded-md ${user.isAdmin
                       ? "bg-green-500 hover:bg-green-600"
                       : "bg-red-500 hover:bg-red-600"
-                  } ${
-                    currentUser?.id === user.id
+                    } ${currentUser?.id === user.id
                       ? "opacity-50 cursor-not-allowed"
                       : ""
-                  }`}
+                    }`}
                   disabled={currentUser?.id === user.id}
                 >
                   {user.isAdmin ? "Yes" : "No"}
@@ -148,15 +146,13 @@ export default function AdminPage() {
               <td className="p-4 cursor-pointer">
                 <button
                   onClick={() => openModal(user, "approve")}
-                  className={`px-3 py-1 text-white rounded-md ${
-                    user.isApproved
+                  className={`px-3 py-1 text-white rounded-md ${user.isApproved
                       ? "bg-green-500 hover:bg-green-600"
                       : "bg-red-500 hover:bg-red-600"
-                  } ${
-                    currentUser?.id === user.id
+                    } ${currentUser?.id === user.id
                       ? "opacity-50 cursor-not-allowed"
                       : ""
-                  }`}
+                    }`}
                   disabled={currentUser?.id === user.id}
                 >
                   {user.isApproved ? "Approved" : "Pending"}
@@ -182,8 +178,8 @@ export default function AdminPage() {
                   ? "revoke admin access"
                   : "grant admin access"
                 : selectedUser.isApproved
-                ? "revoke approval"
-                : "approve"}{" "}
+                  ? "revoke approval"
+                  : "approve"}{" "}
               for this user?
             </p>
             <div className="flex justify-center gap-4">

@@ -29,7 +29,7 @@ export default function RootLayout({
         </header>
 
         {/* Main Content */}
-        <main className="flex-grow w-full p-6">{children}</main>
+        <main className="flex-grow">{children}</main>
       </body>
     </html>
   );

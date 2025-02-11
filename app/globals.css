@@ -8,6 +8,11 @@
   --foreground: #171717;
 }
 
+html {
+  overflow-y: scroll;
+}
+
+
 /* Dark mode overrides */
 body.dark {
   --background: #0a0a0a;

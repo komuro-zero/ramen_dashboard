@@ -10,7 +10,7 @@ type SidebarContextType = {
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-    const [activePage, setActivePage] = useState<string>("dashboard");
+    const [activePage, setActivePage] = useState<string>("shops");
 
     return (
         <SidebarContext.Provider value={{ activePage, setActivePage }}>

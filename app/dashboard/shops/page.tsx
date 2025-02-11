@@ -265,10 +265,10 @@ export default function ManageShops() {
             >
               <h2 className="text-xl font-bold mb-4">
                 {editShop && editShop.id ? "Edit Shop" : "Add Shop"}
-                <motion.button onClick={() => { setShopToDelete(editShop); setIsConfirmOpen(true); }} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition duration-300">
-                  Delete
-                </motion.button>
               </h2>
+              <motion.button onClick={() => { setShopToDelete(editShop); setIsConfirmOpen(true); }} className="mb-4 px-4 py-2 bg-red-400 text-white rounded hover:bg-red-600 transition duration-300 w-full">
+                Delete Shop
+              </motion.button>
 
 
               {/* Shop Name */}
