@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { LoadingModal } from "@/components/LoadingModal";
+// import { LoadingModal } from "@/components/LoadingModal";
+import { LoadingNoodles } from "@/components/LoadingRamen";
 
 
 // Define types
@@ -68,7 +69,7 @@ export default function SearchPage() {
   };
 
   if (loading) {
-    return <LoadingModal message="Fetching data..." />;
+    return <LoadingNoodles />;
   }
 
   return (
