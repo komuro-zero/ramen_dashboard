@@ -60,19 +60,22 @@ export default function Sidebar() {
       {isLoading && <LoadingModal message="Logging out..." color="red" />}
       <h2 className="text-xl font-bold p-6 border-b border-gray-700">Admin Panel</h2>
       <nav className="flex flex-col flex-grow">
-        {sidebarItems.map((item) => (
-          <Link
-            key={item.id}
-            href={item.path}
-            onClick={() => setActivePage(item.id)}
-            className={`p-4 transition duration-200 rounded-lg ${activePage === item.id
-              ? "bg-gray-700 text-teal-400"
-              : "hover:bg-gray-700 hover:text-teal-400"
-              }`}
-          >
-            {item.name}
-          </Link>
-        ))}
+        {sidebarItems
+          .filter((item) => item.id !== "admin" || isAdmin) // Only show "admin" if isAdmin is true
+          .map((item) => (
+            <Link
+              key={item.id}
+              href={item.path}
+              onClick={() => setActivePage(item.id)}
+              className={`p-4 transition duration-200 rounded-lg ${activePage === item.id
+                  ? "bg-gray-700 text-teal-400"
+                  : "hover:bg-gray-700 hover:text-teal-400"
+                }`}
+            >
+              {item.name}
+            </Link>
+          ))}
+
       </nav>
       <footer className="mt-auto p-4 border-t border-gray-700 text-sm text-gray-400">
         <motion.button
