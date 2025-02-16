@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { LoadingModal } from "@/components/LoadingModal";
 import { motion } from "framer-motion";
 
-
 interface Shop {
   id: number;
   name: string;
@@ -34,7 +33,7 @@ export default function ManageShops() {
   const [shopToDelete, setShopToDelete] = useState<Shop | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -96,6 +95,7 @@ export default function ManageShops() {
       editShop && editShop.id ? `/api/shops/${editShop.id}` : "/api/shops";
 
     try {
+      setIsSaving(true);
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -123,6 +123,8 @@ export default function ManageShops() {
     } catch (error) {
       console.error("Error saving shop:", error);
       alert("An error occurred while saving the shop.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -153,14 +155,14 @@ export default function ManageShops() {
       prev.map((ramen) =>
         ramen.id === ramenId
           ? {
-            ...ramen,
-            allergens: ramen.allergens.some((a) => a.id === allergenId)
-              ? ramen.allergens.filter((a) => a.id !== allergenId)
-              : [
-                ...ramen.allergens,
-                allergens.find((a) => a.id === allergenId)!,
-              ],
-          }
+              ...ramen,
+              allergens: ramen.allergens.some((a) => a.id === allergenId)
+                ? ramen.allergens.filter((a) => a.id !== allergenId)
+                : [
+                    ...ramen.allergens,
+                    allergens.find((a) => a.id === allergenId)!,
+                  ],
+            }
           : ramen
       )
     );
@@ -275,11 +277,16 @@ export default function ManageShops() {
               <h2 className="text-xl font-bold mb-4">
                 {editShop && editShop.id ? "Edit Shop" : "Add Shop"}
               </h2>
-              {isDeleting && <LoadingModal message="Deleting Shop..." />}
-              <motion.button onClick={() => { setShopToDelete(editShop); setIsConfirmOpen(true); }} className="mb-4 px-4 py-2 bg-red-400 text-white rounded hover:bg-red-600 transition duration-300 w-full">
+              {isSaving && <LoadingModal message="Saving Shop Details..." />}
+              <motion.button
+                onClick={() => {
+                  setShopToDelete(editShop);
+                  setIsConfirmOpen(true);
+                }}
+                className="mb-4 px-4 py-2 bg-red-400 text-white rounded hover:bg-red-600 transition duration-300 w-full"
+              >
                 Delete Shop
               </motion.button>
-
 
               {/* Shop Name */}
               <label className="block font-semibold text-gray-800 mb-2">
@@ -435,8 +442,18 @@ export default function ManageShops() {
             <h2 className="text-lg font-bold mb-4">Confirm Delete</h2>
             <p>Are you sure you want to delete this shop?</p>
             <div className="flex justify-end space-x-4 mt-4">
-              <button onClick={() => setIsConfirmOpen(false)} className="px-4 py-2 bg-gray-500 text-white rounded">Cancel</button>
-              <button onClick={handleDeleteShop} className="px-4 py-2 bg-red-600 text-white rounded">Delete</button>
+              <button
+                onClick={() => setIsConfirmOpen(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteShop}
+                className="px-4 py-2 bg-red-600 text-white rounded"
+              >
+                Delete
+              </button>
             </div>
           </motion.div>
         </motion.div>
