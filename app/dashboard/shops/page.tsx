@@ -277,7 +277,7 @@ export default function ManageShops() {
               <h2 className="text-xl font-bold mb-4">
                 {editShop && editShop.id ? "Edit Shop" : "Add Shop"}
               </h2>
-              {isSaving && <LoadingModal message="Saving Shop Details..." />}
+              {isDeleting && <LoadingModal message="Deleting Shop..." />}
               <motion.button
                 onClick={() => {
                   setShopToDelete(editShop);
@@ -427,11 +427,13 @@ export default function ManageShops() {
                 </button>
                 <button
                   type="submit"
+                  onClick={handleSave}
                   className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition duration-300"
                 >
                   Save
                 </button>
               </div>
+              {isSaving && <LoadingModal message="Saving Shop..." />}
             </form>
           </div>
         </div>
